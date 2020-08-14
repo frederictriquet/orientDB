@@ -1,0 +1,10 @@
+version: '3'
+services:
+  orientdb:
+    image: "orientdb:latest"
+    environment:
+      - ORIENTDB_ROOT_PASSWORD=root
+    ports:
+      - 2424:2424
+      - 2480:2480
+#    docker run -d --name orientdb -p 2424:2424 -p 2480:2480 -e ORIENTDB_ROOT_PASSWORD=root orientdb:latest

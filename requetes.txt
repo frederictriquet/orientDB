@@ -1,0 +1,69 @@
+
+
+
+connect remote:localhost/test root root
+
+
+DROP CLASS Tag IF EXISTS UNSAFE;
+DROP CLASS User IF EXISTS UNSAFE;
+DROP CLASS Post IF EXISTS UNSAFE;
+DROP CLASS hasInterest IF EXISTS UNSAFE;
+DROP CLASS hasTag IF EXISTS UNSAFE;
+
+CREATE CLASS Tag EXTENDS V;
+CREATE PROPERTY Tag.label STRING;
+CREATE CLASS User EXTENDS V;
+CREATE PROPERTY User.name STRING;
+CREATE CLASS Post EXTENDS V;
+CREATE PROPERTY Post.title STRING;
+CREATE PROPERTY Post.id INT;
+
+
+CREATE CLASS hasInterest EXTENDS E;
+CREATE CLASS hasTag EXTENDS E;
+
+
+CREATE VERTEX Tag SET label='ski';
+CREATE VERTEX Tag SET label='foot';
+CREATE VERTEX Tag SET label='basket';
+
+CREATE VERTEX User SET name='fred';
+CREATE VERTEX User SET name='marc';
+
+CREATE VERTEX Post SET title='article sur le foot', id=1;
+CREATE VERTEX Post SET title='article sur le ski', id=2;
+CREATE VERTEX Post SET title='article sur le basket', id=3;
+CREATE VERTEX Post SET title='article sur les ballons', id=4;
+
+
+
+
+CREATE EDGE hasInterest FROM (SELECT FROM User WHERE name='fred') TO (SELECT FROM Tag WHERE label='ski');
+CREATE EDGE hasInterest FROM (SELECT FROM User WHERE name='fred') TO (SELECT FROM Tag WHERE label='foot');
+
+CREATE EDGE hasInterest FROM (SELECT FROM User WHERE name='fred') TO (SELECT FROM Tag WHERE label='basket');
+
+CREATE EDGE hasInterest FROM (SELECT FROM User WHERE name='marc') TO (SELECT FROM Tag WHERE label='foot');
+CREATE EDGE hasInterest FROM (SELECT FROM User WHERE name='marc') TO (SELECT FROM Tag WHERE label='basket');
+
+
+CREATE EDGE hasTag FROM (SELECT FROM Post WHERE title='article sur le foot') TO (SELECT FROM Tag WHERE label='foot');
+CREATE EDGE hasTag FROM (SELECT FROM Post WHERE title='article sur le ski') TO (SELECT FROM Tag WHERE label='ski');
+CREATE EDGE hasTag FROM (SELECT FROM Post WHERE title='article sur le basket') TO (SELECT FROM Tag WHERE label='basket');
+CREATE EDGE hasTag FROM (SELECT FROM Post WHERE title='article sur les ballons') TO (SELECT FROM Tag WHERE label='foot');
+CREATE EDGE hasTag FROM (SELECT FROM Post WHERE title='article sur les ballons') TO (SELECT FROM Tag WHERE label='basket');
+
+
+
+MATCH {class: User, as: fred, where: (name='fred')}-hasInterest->{as: tag}<-hasTag-{as: post}
+return $pathElements
+
+MATCH {class: User, as: fred, where: (name='fred')}-hasInterest->{as: tag}<-hasTag-{as: post}
+return fred.name,post.title
+
+MATCH {class: User, as: fred, where: (name='fred')}-hasInterest->{as: tag}<-hasTag-{as: post}
+return distinct post.title
+
+-- top !
+MATCH {class: User, as: fred, where: (name='fred')}-hasInterest->{as: tag}<-hasTag-{as: post}
+return distinct post.id, post.title order by post.id
